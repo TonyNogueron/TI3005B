@@ -2,7 +2,7 @@
   "name": "ti3005b",
   "version": "1.0.0",
   "description": "Hilados de Alta Calidad API para la gestión de documentos",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts",

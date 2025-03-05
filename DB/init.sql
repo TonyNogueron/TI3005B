@@ -150,7 +150,8 @@ INSERT INTO
         fileType,
         fileUrl,
         validStatus,
-        uploadedBy
+        uploadedBy,
+        uploadTimestamp
     )
 VALUES
     (
@@ -161,7 +162,8 @@ VALUES
         'PDF',
         'https://www.orimi.com/pdf-test.pdf',
         'Aceptado',
-        1
+        1,
+        CURRENT_TIMESTAMP
     ),
     (
         'Provider',
@@ -171,7 +173,8 @@ VALUES
         'PDF',
         'https://www.orimi.com/pdf-test.pdf',
         'Aceptado',
-        1
+        1,
+        CURRENT_TIMESTAMP
     ),
     (
         'Provider',
@@ -181,5 +184,6 @@ VALUES
         'PDF',
         'https://www.orimi.com/pdf-test.pdf',
         'Aceptado',
-        1
+        1,
+        CURRENT_TIMESTAMP
     );
