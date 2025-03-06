@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
-const GoogleDrive = require("../src/google-drive/drive.js");
+import GoogleDrive from "./google-drive/drive";
 
 dotenv.config();
 
