@@ -20,8 +20,6 @@ async function testConnection() {
     connection.release();
   } catch (error) {
     console.error("Database connection failed", error);
-  } finally {
-    if (pool) pool.end();
   }
 }
 

@@ -51,3 +51,5 @@ const authService = {
         return result.affectedRows > 0;
     },
 };
+
+export default authService;
