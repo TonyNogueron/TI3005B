@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
+const GoogleDrive = require("../src/google-drive/drive.js");
+
 dotenv.config();
 
 const app = express();
@@ -17,3 +19,6 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+GoogleDrive.listFolders();
+GoogleDrive.listFiles();
