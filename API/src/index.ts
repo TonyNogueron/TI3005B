@@ -3,20 +3,22 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import authRouter from "./routes/authRoute";
+import documentRouter from "./routes/documentRoute";
 
 // import GoogleDrive from "./google-drive/drive";
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
-
+// const PORT = process.env.PORT || 3001;
+const PORT = 3002;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use("/", authRouter);
-
+app.use("/documents", documentRouter);
 
 app.get("/", (req, res) => {
   res.send("API is running");

@@ -1,5 +1,6 @@
 import { google } from "googleapis";
 import { drive_v3 } from "googleapis";
+import { Readable } from "stream";
 import {
   GoogleDriveFile,
   DocumentOwnerType,
@@ -149,32 +150,37 @@ const GoogleDrive = {
 
       // Upload the file to the client folder
       for (const file of files) {
-        const fileMetadata = {
-          name: file.name,
-          parents: [clientFolderId],
-        };
+        try {
+          const fileMetadata = {
+            name: file.name,
+            parents: [clientFolderId],
+          };
 
-        const media = {
-          mimeType: file.type,
-          body: file.data,
-        };
+          const media = {
+            mimeType: file.type,
+            body: Readable.from(file.data),
+          };
 
-        const fileCreationRes = await drive.files.create({
-          requestBody: fileMetadata,
-          media: media,
-          fields: "id, name, mimeType, webViewLink",
-          supportsAllDrives: true,
-        });
+          const fileCreationRes = await drive.files.create({
+            requestBody: fileMetadata,
+            media: media,
+            fields: "id, name, mimeType, webViewLink",
+            supportsAllDrives: true,
+          });
 
-        uploadedFiles.push({
-          id: fileCreationRes.data.id!,
-          name: fileCreationRes.data.name!,
-          mimeType: fileCreationRes.data.mimeType!,
-          webViewLink: fileCreationRes.data.webViewLink!,
-        });
-
-        return uploadedFiles;
+          console.log(`File uploaded to folder ID: ${clientFolderId}`);
+          uploadedFiles.push({
+            id: fileCreationRes.data.id!,
+            name: fileCreationRes.data.name!,
+            mimeType: fileCreationRes.data.mimeType!,
+            webViewLink: fileCreationRes.data.webViewLink!,
+          });
+        } catch (error) {
+          console.error(`Error uploading file ${file.name}:`, error);
+        }
       }
+
+      return uploadedFiles;
     } catch (error) {
       console.error("Error uploading files:", error);
     }
