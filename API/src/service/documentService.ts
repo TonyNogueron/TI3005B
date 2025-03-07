@@ -5,6 +5,7 @@ import {
   DocumentType,
 } from "../interfaces/IDocumentInterfaces";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
+import { DocumentOwnerType } from "../interfaces/IGoogleDriveInterfaces";
 
 const documentService = {
   getAllDocuments: async (): Promise<Document[]> => {
@@ -19,7 +20,7 @@ const documentService = {
   getDocumentsByStatus: async (status: DocumentStatus): Promise<Document[]> => {
     const connection = await pool.getConnection();
     const [rows] = await connection.query<RowDataPacket[]>(
-      "SELECT * FROM Document WHERE status = ?",
+      "SELECT * FROM Document WHERE validStatus = ?",
       [status]
     );
     connection.release();
@@ -27,12 +28,12 @@ const documentService = {
   },
 
   getCurrentRequestedDocumentsByOwner: async (
-    ownerType: string,
+    ownerType: DocumentOwnerType,
     ownerId: number
   ): Promise<Document[]> => {
     const connection = await pool.getConnection();
     const [rows] = await connection.query<RowDataPacket[]>(
-      "SELECT * FROM Document WHERE ownerType = ? AND ownerId = ? AND status = ?",
+      "SELECT * FROM Document WHERE ownerType = ? AND ownerId = ? AND validStatus = ?",
       [ownerType, ownerId, DocumentStatus.EN_ESPERA]
     );
     connection.release();
@@ -55,7 +56,7 @@ const documentService = {
   ): Promise<boolean> => {
     const connection = await pool.getConnection();
     const [result] = await connection.query<ResultSetHeader>(
-      "UPDATE Document SET status = ?, rejectedReason = ? WHERE id = ?",
+      "UPDATE Document SET validStatus = ?, rejectedReason = ? WHERE id = ?",
       [DocumentStatus.RECHAZADO, rejectedReason, id]
     );
     connection.release();
@@ -66,20 +67,19 @@ const documentService = {
     id: number,
     fileName: string,
     fileType: DocumentType,
-    fileUrl: string,
-    uploadedBy: number
+    fileUrl: string
   ): Promise<boolean> => {
     const connection = await pool.getConnection();
     const [result] = await connection.query<ResultSetHeader>(
-      "UPDATE Document SET fileName = ?, fileType = ?, fileUrl = ?, uploadTimestamp = NOW(), uploadedBy = ?, validStatus = ? WHERE id = ?",
-      [fileName, fileType, fileUrl, uploadedBy, DocumentStatus.POR_VALIDAR, id]
+      "UPDATE Document SET fileName = ?, fileType = ?, fileUrl = ?, uploadTimestamp = NOW(), validStatus = ? WHERE id = ?",
+      [fileName, fileType, fileUrl, DocumentStatus.POR_VALIDAR, id]
     );
     connection.release();
     return result.affectedRows > 0;
   },
 
   createInitialDocument: async (
-    ownerType: string,
+    ownerType: DocumentOwnerType,
     ownerId: number,
     documentType: DocumentType
   ): Promise<number> => {
@@ -95,7 +95,7 @@ const documentService = {
   insertFullDocument: async (document: Document): Promise<number> => {
     const connection = await pool.getConnection();
     const [result] = await connection.query<ResultSetHeader>(
-      "INSERT INTO Document (ownerType, ownerId, documentType, fileName, fileType, fileUrl, uploadTimestamp, requestedTimestamp, uploadedBy, validStatus) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW(), ?, ?)",
+      "INSERT INTO Document (ownerType, ownerId, documentType, fileName, fileType, fileUrl, uploadTimestamp, requestedTimestamp, validStatus) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW(),?)",
       [
         document.ownerType,
         document.ownerId,
@@ -103,7 +103,6 @@ const documentService = {
         document.fileName,
         document.fileType,
         document.fileUrl,
-        document.uploadedBy,
         DocumentStatus.POR_VALIDAR,
       ]
     );

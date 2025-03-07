@@ -66,5 +66,4 @@ export interface Document {
   requestedTimestamp: string;
   validStatus: DocumentStatus;
   rejectedReason?: string;
-  uploadedBy?: number;
 }

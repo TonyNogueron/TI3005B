@@ -10,4 +10,9 @@ documentRouter.post(
   documentController.uploadMultipleDocuments
 );
 
+documentRouter.post(
+  "/requestDocuments",
+  documentController.requestNewDocuments
+);
+
 export default documentRouter;

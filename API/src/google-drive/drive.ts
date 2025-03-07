@@ -6,6 +6,7 @@ import {
   DocumentOwnerType,
   FileUpload,
 } from "../interfaces/IGoogleDriveInterfaces";
+import { DocumentType } from "../interfaces/IDocumentInterfaces";
 
 const KEYPATH: string =
   "/Users/tonynogueron/Documents/Tec/Universidad/Materias/8vo Semestre/Bloque Hilados/TI3005B/API/src/google-drive/GDriveAPIKEY.json";
@@ -174,6 +175,7 @@ const GoogleDrive = {
             name: fileCreationRes.data.name!,
             mimeType: fileCreationRes.data.mimeType!,
             webViewLink: fileCreationRes.data.webViewLink!,
+            documentType: file.documentType!,
           });
         } catch (error) {
           console.error(`Error uploading file ${file.name}:`, error);
