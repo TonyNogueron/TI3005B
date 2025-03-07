@@ -34,3 +34,37 @@ export const numToMonth = (num: number): string => {
       return "";
   }
 };
+
+export enum OwnerType {
+  CLIENT = "Client",
+  PROVIDER = "Provider",
+}
+
+export enum DocumentType {
+  CONSTANCIA_DE_SITUACION_FISCAL = "ConstanciaDeSituacionFiscal",
+  OPINION_DE_CUMPLIMIENTO = "OpinionDeCumplimiento",
+  CONTRATO = "Contrato",
+  ORDEN_DE_COMPRA = "OrdenDeCompra",
+}
+
+export enum DocumentStatus {
+  POR_VALIDAR = "Por validar",
+  ACEPTADO = "Aceptado",
+  RECHAZADO = "Rechazado",
+  EN_ESPERA = "En espera",
+}
+
+export interface Document {
+  id: number;
+  ownerType: OwnerType;
+  ownerId: number;
+  documentType: DocumentType;
+  fileName?: string;
+  fileType?: string;
+  fileUrl?: string;
+  uploadTimestamp?: string;
+  requestedTimestamp: string;
+  validStatus: DocumentStatus;
+  rejectedReason?: string;
+  uploadedBy?: number;
+}

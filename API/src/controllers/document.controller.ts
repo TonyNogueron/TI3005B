@@ -23,7 +23,6 @@ const documentController = {
       }
 
       const files: FileUpload[] = req.files.map((file: any) => {
-        console.log("File buffer length:", file.buffer.length);
         return {
           name: file.originalname,
           type: file.mimetype,
