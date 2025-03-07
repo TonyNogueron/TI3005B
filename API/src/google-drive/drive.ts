@@ -132,7 +132,7 @@ const GoogleDrive = {
       // Client or provider folder
       const ownerFolderId = await GoogleDrive.findOrCreateFolder(
         yearFolderId,
-        type === DocumentOwnerType.CLIENT ? "Clientes" : "Proveedores"
+        type.toLowerCase() == "client" ? "Clientes" : "Proveedores"
       );
 
       // Create the month folder
@@ -169,7 +169,6 @@ const GoogleDrive = {
             supportsAllDrives: true,
           });
 
-          console.log(`File uploaded to folder ID: ${clientFolderId}`);
           uploadedFiles.push({
             id: fileCreationRes.data.id!,
             name: fileCreationRes.data.name!,

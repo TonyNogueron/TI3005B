@@ -66,7 +66,7 @@ const documentService = {
   updateUploadedDocument: async (
     id: number,
     fileName: string,
-    fileType: DocumentType,
+    fileType: string,
     fileUrl: string
   ): Promise<boolean> => {
     const connection = await pool.getConnection();

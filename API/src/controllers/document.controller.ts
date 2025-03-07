@@ -6,6 +6,8 @@ import {
   IDocumentResponse,
   numToMonth,
   OwnerType,
+  Document,
+  DocumentStatus,
 } from "../interfaces/IDocumentInterfaces";
 import documentService from "../service/documentService";
 import clientService from "../service/clientService";
@@ -70,7 +72,10 @@ const documentController = {
       const year = currentDate.getFullYear().toString();
       const month = numToMonth(currentDate.getMonth() + 1);
 
-      if (ownerType === OwnerType.CLIENT) {
+      console.log("Received ownerType:", ownerType);
+      console.log("Enum value of OwnerType.CLIENT:", OwnerType.CLIENT);
+
+      if (ownerType === "Client") {
         const client = await clientService.getClientById(ownerId);
         if (!client) {
           documentResponse.message = "Client not found";
@@ -118,20 +123,48 @@ const documentController = {
 
       // Update document records in the database
       let failedUpdates: string[] = [];
+      let insertedDocuments: string[] = [];
+
       for (const file of uploadedFiles) {
-        const clientDocument = clientDocuments.find(
+        let clientDocument = clientDocuments.find(
           (doc) => doc.documentType === file.documentType
         );
 
-        const docUpdate = await documentService.updateUploadedDocument(
-          clientDocument?.id || 0,
-          file.name,
-          file.documentType!,
-          file.webViewLink!
-        );
+        if (clientDocument) {
+          // Update the existing document record
+          const docUpdate = await documentService.updateUploadedDocument(
+            clientDocument.id,
+            file.name,
+            file.mimeType!,
+            file.webViewLink!
+          );
 
-        if (!docUpdate) {
-          failedUpdates.push(file.name);
+          if (!docUpdate) {
+            failedUpdates.push(file.name);
+          }
+        } else {
+          // If document was not requested (Contrato, Orden de compra)
+          const documentToInsert: Document = {
+            id: 0,
+            ownerType,
+            ownerId,
+            documentType: file.documentType!,
+            fileName: file.name,
+            fileType: file.mimeType,
+            fileUrl: file.webViewLink,
+            requestedTimestamp: "",
+            validStatus: DocumentStatus.POR_VALIDAR,
+          };
+
+          const newDocument = await documentService.insertFullDocument(
+            documentToInsert
+          );
+
+          if (!newDocument) {
+            failedUpdates.push(file.name);
+          } else {
+            insertedDocuments.push(file.name);
+          }
         }
       }
 
@@ -142,7 +175,11 @@ const documentController = {
         res.status(207).json(documentResponse);
       } else {
         documentResponse.success = true;
-        documentResponse.message = "Files uploaded successfully";
+        documentResponse.message = `Files uploaded successfully${
+          insertedDocuments.length > 0
+            ? `, including new documents: ${insertedDocuments.join(", ")}`
+            : ""
+        }`;
         documentResponse.data = uploadedFiles;
         res.status(200).json(documentResponse);
       }
