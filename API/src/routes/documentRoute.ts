@@ -15,4 +15,35 @@ documentRouter.post(
   documentController.requestNewDocuments
 );
 
+documentRouter.get("/", documentController.getAllDocuments);
+
+documentRouter.get(
+  "/pending",
+  documentController.getCurrentPendingDocuments
+);
+
+documentRouter.get(
+  "/valid",
+  documentController.getCurrentValidDocuments
+);
+
+documentRouter.get(
+  "/rejected",
+  documentController.getCurrentRejectedDocuments
+);
+
+documentRouter.get(
+  "/client",
+  documentController.getCurrentDocumentsByClientName
+);
+
+documentRouter.get(
+  "/provider",
+  documentController.getCurrentDocumentsByProviderName
+);
+
+documentRouter.put("/validate", documentController.validateDocument);
+
+documentRouter.put("/reject", documentController.rejectDocument);
+
 export default documentRouter;

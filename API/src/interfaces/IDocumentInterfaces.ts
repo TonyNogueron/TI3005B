@@ -52,6 +52,7 @@ export enum DocumentStatus {
   ACEPTADO = "Aceptado",
   RECHAZADO = "Rechazado",
   EN_ESPERA = "En espera",
+  SIN_ENTREGA = "Sin entrega",
 }
 
 export interface Document {

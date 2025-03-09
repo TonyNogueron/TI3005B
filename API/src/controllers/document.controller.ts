@@ -72,9 +72,6 @@ const documentController = {
       const year = currentDate.getFullYear().toString();
       const month = numToMonth(currentDate.getMonth() + 1);
 
-      console.log("Received ownerType:", ownerType);
-      console.log("Enum value of OwnerType.CLIENT:", OwnerType.CLIENT);
-
       if (ownerType === "Client") {
         const client = await clientService.getClientById(ownerId);
         if (!client) {
@@ -229,6 +226,241 @@ const documentController = {
 
     documentResponse.success = true;
     documentResponse.message = "Document creation successful";
+    res.status(200).json(documentResponse);
+  },
+
+  getAllDocuments: async (req: Request, res: Response): Promise<void> => {
+    let documentResponse: IDocumentResponse = {
+      success: false,
+      message: "No documents found",
+    };
+
+    try {
+      const documents = await documentService.getAllDocuments();
+
+      if (!documents || documents.length === 0) {
+        res.status(404).json(documentResponse);
+        return;
+      }
+
+      documentResponse.success = true;
+      documentResponse.message = "Documents found";
+      documentResponse.data = documents;
+      res.status(200).json(documentResponse);
+    } catch (error) {
+      console.error("Error listing documents:", error);
+      documentResponse.message = "Internal server error";
+      res.status(500).json(documentResponse);
+    }
+  },
+
+  getCurrentPendingDocuments: async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    let documentResponse: IDocumentResponse = {
+      success: false,
+      message: "No pending documents found",
+    };
+    try {
+      const documents = await documentService.getUpdatedDocumentsByStatusArray([
+        DocumentStatus.RECHAZADO,
+        DocumentStatus.POR_VALIDAR,
+        DocumentStatus.SIN_ENTREGA,
+      ]);
+
+      if (!documents || documents.length === 0) {
+        res.status(404).json(documentResponse);
+        return;
+      }
+
+      documentResponse.success = true;
+      documentResponse.message = "Documents found";
+      documentResponse.data = documents;
+      res.status(200).json(documentResponse);
+    } catch (error) {
+      console.error("Error listing documents:", error);
+      documentResponse.message = "Internal server error";
+      res.status(500).json(documentResponse);
+    }
+  },
+
+  validateDocument: async (req: Request, res: Response): Promise<void> => {
+    let documentResponse: IDocumentResponse = {
+      success: false,
+      message: "Bad request. Document Id is required",
+    };
+
+    const { id } = req.body;
+
+    if (!id) {
+      res.status(400).json(documentResponse);
+      return;
+    }
+
+    const validated = await documentService.updateDocumentValid(id);
+
+    if (!validated) {
+      documentResponse.message = "Failed to update document";
+      res.status(500).json(documentResponse);
+      return;
+    }
+
+    documentResponse.success = true;
+    documentResponse.message = "Document validated";
+    res.status(200).json(documentResponse);
+  },
+
+  rejectDocument: async (req: Request, res: Response): Promise<void> => {
+    let documentResponse: IDocumentResponse = {
+      success: false,
+      message: "Bad request. Document Id and reason are required",
+    };
+
+    const { id, rejectedReason } = req.body;
+
+    if (!id || !rejectedReason) {
+      res.status(400).json(documentResponse);
+      return;
+    }
+
+    const rejected = await documentService.updateDocumentRejected(
+      id,
+      rejectedReason
+    );
+
+    if (!rejected) {
+      documentResponse.message = "Failed to update document";
+      res.status(500).json(documentResponse);
+      return;
+    }
+
+    documentResponse.success = true;
+    documentResponse.message = "Document rejected";
+    res.status(200).json(documentResponse);
+  },
+
+  getCurrentValidDocuments: async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    let documentResponse: IDocumentResponse = {
+      success: false,
+      message: "No valid documents found",
+    };
+    try {
+      const documents = await documentService.getUpdatedDocumentsByStatusArray([
+        DocumentStatus.ACEPTADO,
+      ]);
+
+      if (!documents || documents.length === 0) {
+        res.status(404).json(documentResponse);
+        return;
+      }
+
+      documentResponse.success = true;
+      documentResponse.message = "Documents found";
+      documentResponse.data = documents;
+      res.status(200).json(documentResponse);
+    } catch (error) {
+      console.error("Error listing documents:", error);
+      documentResponse.message = "Internal server error";
+      res.status(500).json(documentResponse);
+    }
+  },
+
+  getCurrentRejectedDocuments: async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    let documentResponse: IDocumentResponse = {
+      success: false,
+      message: "No rejected documents found",
+    };
+    try {
+      const documents = await documentService.getUpdatedDocumentsByStatusArray([
+        DocumentStatus.RECHAZADO,
+      ]);
+
+      if (!documents || documents.length === 0) {
+        res.status(404).json(documentResponse);
+        return;
+      }
+
+      documentResponse.success = true;
+      documentResponse.message = "Documents found";
+      documentResponse.data = documents;
+      res.status(200).json(documentResponse);
+    } catch (error) {
+      console.error("Error listing documents:", error);
+      documentResponse.message = "Internal server error";
+      res.status(500).json(documentResponse);
+    }
+  },
+
+  getCurrentDocumentsByClientName: async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    let documentResponse: IDocumentResponse = {
+      success: false,
+      message: "Bad request. Client name is required",
+    };
+
+    const { clientName } = req.body;
+
+    if (!clientName) {
+      res.status(400).json(documentResponse);
+      return;
+    }
+
+    const documents = await documentService.getCurrentDocumentsByOwnerName(
+      clientName,
+      OwnerType.CLIENT
+    );
+
+    if (!documents || documents.length === 0) {
+      documentResponse.message = "No documents found";
+      res.status(404).json(documentResponse);
+      return;
+    }
+
+    documentResponse.success = true;
+    documentResponse.message = "Documents found";
+    documentResponse.data = documents;
+    res.status(200).json(documentResponse);
+  },
+
+  getCurrentDocumentsByProviderName: async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    let documentResponse: IDocumentResponse = {
+      success: false,
+      message: "Bad request. Provider name is required",
+    };
+
+    const { providerName } = req.body;
+
+    if (!providerName) {
+      res.status(400).json(documentResponse);
+      return;
+    }
+
+    const documents = await documentService.getCurrentDocumentsByOwnerName(
+      providerName,
+      OwnerType.PROVIDER
+    );
+
+    if (!documents || documents.length === 0) {
+      documentResponse.message = "No documents found";
+      res.status(404).json(documentResponse);
+      return;
+    }
+
+    documentResponse.success = true;
+    documentResponse.message = "Documents found";
+    documentResponse.data = documents;
     res.status(200).json(documentResponse);
   },
 };

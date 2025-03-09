@@ -3,6 +3,7 @@ import {
   Document,
   DocumentStatus,
   DocumentType,
+  OwnerType,
 } from "../interfaces/IDocumentInterfaces";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
 import { DocumentOwnerType } from "../interfaces/IGoogleDriveInterfaces";
@@ -27,6 +28,35 @@ const documentService = {
     return rows as Document[];
   },
 
+  getDocumentsByStatusArray: async (
+    statuses: DocumentStatus[]
+  ): Promise<Document[]> => {
+    const connection = await pool.getConnection();
+    const [rows] = await connection.query<RowDataPacket[]>(
+      `SELECT * FROM Document WHERE validStatus IN (${statuses
+        .map(() => "?")
+        .join(", ")})`,
+      statuses
+    );
+    connection.release();
+    return rows as Document[];
+  },
+
+  getUpdatedDocumentsByStatusArray: async (
+    statuses: DocumentStatus[]
+  ): Promise<Document[]> => {
+    const connection = await pool.getConnection();
+    const [rows] = await connection.query<RowDataPacket[]>(
+      `SELECT * FROM Document 
+       WHERE validStatus IN (${statuses.map(() => "?").join(", ")}) 
+       AND MONTH(requestedTimestamp) = MONTH(CURDATE()) 
+       AND YEAR(requestedTimestamp) = YEAR(CURDATE())`,
+      statuses
+    );
+    connection.release();
+    return rows as Document[];
+  },
+
   getCurrentRequestedDocumentsByOwner: async (
     ownerType: DocumentOwnerType,
     ownerId: number
@@ -40,10 +70,30 @@ const documentService = {
     return rows as Document[];
   },
 
+  getDocumentsOnOrAfterDate: async (date: string): Promise<Document[]> => {
+    const connection = await pool.getConnection();
+    const [rows] = await connection.query<RowDataPacket[]>(
+      "SELECT * FROM Document WHERE requestedTimestamp >= ?",
+      [date]
+    );
+    connection.release();
+    return rows as Document[];
+  },
+
+  getDocumentsOnOrBeforeDate: async (date: string): Promise<Document[]> => {
+    const connection = await pool.getConnection();
+    const [rows] = await connection.query<RowDataPacket[]>(
+      "SELECT * FROM Document WHERE requestedTimestamp <= ?",
+      [date]
+    );
+    connection.release();
+    return rows as Document[];
+  },
+
   updateDocumentValid: async (id: number): Promise<boolean> => {
     const connection = await pool.getConnection();
     const [result] = await connection.query<ResultSetHeader>(
-      "UPDATE Document SET validStatus = ? WHERE id = ?",
+      "UPDATE Document SET validStatus = ?, rejectedReason = NULL WHERE id = ?",
       [DocumentStatus.ACEPTADO, id]
     );
     connection.release();
@@ -108,6 +158,22 @@ const documentService = {
     );
     connection.release();
     return result.insertId;
+  },
+
+  getCurrentDocumentsByOwnerName: async (
+    ownerName: string,
+    ownerType: OwnerType
+  ): Promise<Document[]> => {
+    const connection = await pool.getConnection();
+    const [rows] = await connection.query<RowDataPacket[]>(
+      `SELECT * FROM Document WHERE ownerId = (SELECT id FROM Client WHERE name = ?)
+       AND ownerType = ?
+       AND MONTH(requestedTimestamp) = MONTH(CURDATE()) 
+       AND YEAR(requestedTimestamp) = YEAR(CURDATE())`,
+      [ownerName, ownerType]
+    );
+    connection.release();
+    return rows as Document[];
   },
 };
 
