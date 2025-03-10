@@ -4,14 +4,14 @@ import dotenv from "dotenv";
 
 import authRouter from "./routes/authRoute";
 import documentRouter from "./routes/documentRoute";
+import { sendEmailWithTemplate } from "./service/emailService";
 
 // import GoogleDrive from "./google-drive/drive";
 
 dotenv.config();
 
 const app = express();
-// const PORT = process.env.PORT || 3001;
-const PORT = 3002;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
@@ -30,3 +30,9 @@ app.listen(PORT, () => {
 
 // GoogleDrive.listFolders();
 // GoogleDrive.listFolderTree("1UMN93x7R_B29gBSyUc5QprNRQT6yhGMK", 0);
+
+sendEmailWithTemplate(
+  "tec@hiladosdealtacalidad.com",
+  "Tec CVA",
+  "https://www.google.com"
+);
