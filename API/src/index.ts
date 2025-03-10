@@ -4,9 +4,6 @@ import dotenv from "dotenv";
 
 import authRouter from "./routes/authRoute";
 import documentRouter from "./routes/documentRoute";
-import { sendEmailWithTemplate } from "./service/emailService";
-
-// import GoogleDrive from "./google-drive/drive";
 
 dotenv.config();
 
@@ -28,11 +25,8 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-// GoogleDrive.listFolders();
-// GoogleDrive.listFolderTree("1UMN93x7R_B29gBSyUc5QprNRQT6yhGMK", 0);
-
-sendEmailWithTemplate(
-  "tec@hiladosdealtacalidad.com",
-  "Tec CVA",
-  "https://www.google.com"
-);
+// sendEmailWithTemplate(
+//   "tec@hiladosdealtacalidad.com",
+//   "Tec CVA",
+//   "https://www.google.com"
+// );

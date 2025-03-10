@@ -52,7 +52,7 @@ export const sendEmailWithTemplate = async (
   to: string,
   clientName: string,
   url: string
-): Promise<Boolean> => {
+): Promise<boolean> => {
   try {
     const htmlContent = loadEmailTemplate(clientName, url);
 
