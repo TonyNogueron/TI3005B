@@ -137,7 +137,8 @@ const authController = {
       message: "Internal server error",
       ownerType: "",
       ownerId: 0,
-      data: {},
+      ownerData: {},
+      documents: {},
     };
 
     if (!token) {
@@ -161,19 +162,21 @@ const authController = {
         return;
       }
 
+      validateResponse.documents = documents;
+
       if (payload.ownerType.toLowerCase() === "client") {
         const client = await clientService.getClientById(payload.ownerId);
         if (client) {
           validateResponse.ownerType = "Client";
           validateResponse.ownerId = client.id;
-          validateResponse.data = client;
+          validateResponse.ownerData = client;
         }
       } else {
         const provider = await providerService.getProviderById(payload.ownerId);
         if (provider) {
           validateResponse.ownerType = "Provider";
           validateResponse.ownerId = provider.id;
-          validateResponse.data = provider;
+          validateResponse.ownerData = provider;
         }
       }
 
