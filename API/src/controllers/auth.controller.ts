@@ -8,6 +8,9 @@ import { sendEmailWithTemplate } from "../service/emailService";
 import clientService from "../service/clientService";
 import providerService from "../service/providerService";
 
+import dotenv from "dotenv";
+dotenv.config();
+
 const authController = {
   login: async (req: Request, res: Response) => {
     const loginRequest: ILoginRequest = req.body;
@@ -102,7 +105,7 @@ const authController = {
           emailSent = await sendEmailWithTemplate(
             client.email,
             client.name,
-            `${process.env.CLIENT_UPLOAD}/upload?token=${token}`
+            `${process.env.CLIENT_UPLOAD}?token=${token}`
           );
         }
       } else {
@@ -185,7 +188,7 @@ const authController = {
       res.status(200).json(validateResponse);
     } catch (error) {
       console.error("Validate token error:", error);
-      res.status(500).json("Internal server error");
+      res.status(500).json(validateResponse);
     }
   },
 };

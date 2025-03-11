@@ -74,6 +74,20 @@ const providerService = {
 
     return result.affectedRows > 0;
   },
+
+  updateProviderStatus: async (
+    id: number,
+    status: string
+  ): Promise<boolean> => {
+    const connection = await pool.getConnection();
+    const [result] = await connection.query<ResultSetHeader>(
+      "UPDATE Provider SET documentsStatus = ? WHERE id = ?",
+      [status, id]
+    );
+    connection.release();
+
+    return result.affectedRows > 0;
+  },
 };
 
 export default providerService;

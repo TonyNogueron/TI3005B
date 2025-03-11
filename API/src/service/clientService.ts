@@ -74,6 +74,17 @@ const clientService = {
 
     return result.affectedRows > 0;
   },
+
+  updateClientStatus: async (id: number, status: string): Promise<boolean> => {
+    const connection = await pool.getConnection();
+    const [result] = await connection.query<ResultSetHeader>(
+      "UPDATE Client SET documentsStatus = ? WHERE id = ?",
+      [status, id]
+    );
+    connection.release();
+
+    return result.affectedRows > 0;
+  },
 };
 
 export default clientService;

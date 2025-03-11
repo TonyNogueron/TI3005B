@@ -165,6 +165,19 @@ const documentController = {
         }
       }
 
+      // Update ownerStatus
+      if (ownerType.toLowerCase() === "client") {
+        await clientService.updateClientStatus(
+          ownerId,
+          DocumentStatus.POR_VALIDAR
+        );
+      } else {
+        await providerService.updateProviderStatus(
+          ownerId,
+          DocumentStatus.POR_VALIDAR
+        );
+      }
+
       if (failedUpdates.length > 0) {
         documentResponse.message = `Some files uploaded, but failed to update records: ${failedUpdates.join(
           ", "

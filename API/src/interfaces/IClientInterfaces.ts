@@ -1,4 +1,6 @@
+import { Document } from "./IDocumentInterfaces";
 import { Provider } from "./IProviderInterfaces";
+import { Vendor } from "./IVendorInterfaces";
 
 export enum ClientProviderStatus {
   SIN_ENTREGA = "Sin entrega",
@@ -22,4 +24,16 @@ export interface IClientProviderResponse {
   success: boolean;
   message: string;
   data?: (Client | Provider)[];
+}
+
+export interface IClientDocumentsResponse {
+  success: boolean;
+  message: string;
+  clients: IClientDashboardRow[];
+}
+
+export interface IClientDashboardRow {
+  client: Client;
+  vendor: Vendor;
+  documents: Document[];
 }
