@@ -301,12 +301,12 @@ const documentController = {
   validateDocument: async (req: Request, res: Response): Promise<void> => {
     let documentResponse: IDocumentResponse = {
       success: false,
-      message: "Bad request. Document Id is required",
+      message: "Bad request. Document Id, ownerId, and ownerType are required",
     };
 
-    const { id } = req.body;
+    const { id, ownerId, ownerType } = req.body;
 
-    if (!id) {
+    if (!id || !ownerId || !ownerType) {
       res.status(400).json(documentResponse);
       return;
     }
@@ -319,6 +319,12 @@ const documentController = {
       return;
     }
 
+    if (ownerType.toLowerCase() === "client") {
+      await clientService.validateAndUpdateClientStatus(ownerId);
+    } else {
+      await providerService.validateAndUpdateProviderStatus(ownerId);
+    }
+
     documentResponse.success = true;
     documentResponse.message = "Document validated";
     res.status(200).json(documentResponse);
@@ -327,12 +333,13 @@ const documentController = {
   rejectDocument: async (req: Request, res: Response): Promise<void> => {
     let documentResponse: IDocumentResponse = {
       success: false,
-      message: "Bad request. Document Id and reason are required",
+      message:
+        "Bad request. Document Id, ownerId, ownerType, and reason are required",
     };
 
-    const { id, rejectedReason } = req.body;
+    const { id, rejectedReason, ownerId, ownerType } = req.body;
 
-    if (!id || !rejectedReason) {
+    if (!id || !rejectedReason || !ownerId || !ownerType) {
       res.status(400).json(documentResponse);
       return;
     }
@@ -346,6 +353,12 @@ const documentController = {
       documentResponse.message = "Failed to update document";
       res.status(500).json(documentResponse);
       return;
+    }
+
+    if (ownerType.toLowerCase() === "client") {
+      await clientService.validateAndUpdateClientStatus(ownerId);
+    } else {
+      await providerService.validateAndUpdateProviderStatus(ownerId);
     }
 
     documentResponse.success = true;

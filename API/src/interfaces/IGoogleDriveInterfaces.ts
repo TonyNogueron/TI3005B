@@ -9,8 +9,8 @@ export interface GoogleDriveFile {
 }
 
 export enum DocumentOwnerType {
-  CLIENT = "client",
-  PROVIDER = "provider",
+  CLIENT = "Client",
+  PROVIDER = "Provider",
 }
 
 export interface FileUpload {

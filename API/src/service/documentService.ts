@@ -175,6 +175,19 @@ const documentService = {
     connection.release();
     return rows as Document[];
   },
+
+  getThisMonthDocumentsByOwner: async (
+    ownerType: DocumentOwnerType,
+    ownerId: number
+  ): Promise<Document[]> => {
+    const connection = await pool.getConnection();
+    const [rows] = await connection.query<RowDataPacket[]>(
+      "SELECT * FROM Document WHERE ownerType = ? AND ownerId = ? AND MONTH(requestedTimestamp) = MONTH(CURDATE()) AND YEAR(requestedTimestamp) = YEAR(CURDATE())",
+      [ownerType, ownerId]
+    );
+    connection.release();
+    return rows as Document[];
+  },
 };
 
 export default documentService;

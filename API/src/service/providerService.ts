@@ -1,6 +1,9 @@
 import pool from "../config/dbconfig";
 import { Provider } from "../interfaces/IProviderInterfaces";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
+import documentService from "./documentService";
+import { DocumentOwnerType } from "../interfaces/IGoogleDriveInterfaces";
+import { DocumentStatus } from "../interfaces/IDocumentInterfaces";
 
 const providerService = {
   getAllProviders: async (): Promise<Provider[]> => {
@@ -87,6 +90,60 @@ const providerService = {
     connection.release();
 
     return result.affectedRows > 0;
+  },
+
+  validateAndUpdateProviderStatus: async (id: number): Promise<boolean> => {
+    try {
+      const providerDocuments =
+        await documentService.getThisMonthDocumentsByOwner(
+          DocumentOwnerType.PROVIDER,
+          id
+        );
+
+      // Filter out documents with status "EN_ESPERA" or "SIN_ENTREGA"
+      const filteredDocuments = providerDocuments.filter(
+        (doc) =>
+          doc.validStatus !== DocumentStatus.EN_ESPERA &&
+          doc.validStatus !== DocumentStatus.SIN_ENTREGA
+      );
+
+      if (filteredDocuments.length === 0) {
+        // No relevant documents found
+        return false;
+      }
+
+      const hasRejectedDocument = filteredDocuments.some(
+        (doc) => doc.validStatus === DocumentStatus.RECHAZADO
+      );
+
+      if (hasRejectedDocument) {
+        // at least 1 is rejected
+        await providerService.updateProviderStatus(
+          id,
+          DocumentStatus.RECHAZADO
+        );
+        return true;
+      }
+
+      const allDocumentsAccepted = filteredDocuments.every(
+        (doc) => doc.validStatus === DocumentStatus.ACEPTADO
+      );
+
+      if (allDocumentsAccepted) {
+        await providerService.updateProviderStatus(id, DocumentStatus.ACEPTADO);
+        return true;
+      }
+
+      // If some documents are accepted and some are pending
+      await providerService.updateProviderStatus(
+        id,
+        DocumentStatus.POR_VALIDAR
+      );
+      return true;
+    } catch (error) {
+      console.error("Error validating and updating client status:", error);
+      throw error;
+    }
   },
 };
 

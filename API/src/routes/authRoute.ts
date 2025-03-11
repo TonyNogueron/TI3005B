@@ -14,7 +14,6 @@ authRouter.post(
 
 authRouter.post(
   "/validateToken",
-  middleware,
   authController.validateUploadToken
 );
 

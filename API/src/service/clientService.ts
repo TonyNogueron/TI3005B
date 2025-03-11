@@ -1,6 +1,9 @@
 import pool from "../config/dbconfig";
 import { Client } from "../interfaces/IClientInterfaces";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
+import documentService from "./documentService";
+import { DocumentOwnerType } from "../interfaces/IGoogleDriveInterfaces";
+import { DocumentStatus } from "../interfaces/IDocumentInterfaces";
 
 const clientService = {
   getAllClients: async (): Promise<Client[]> => {
@@ -84,6 +87,50 @@ const clientService = {
     connection.release();
 
     return result.affectedRows > 0;
+  },
+  validateAndUpdateClientStatus: async (id: number): Promise<boolean> => {
+    try {
+      const clientDocuments =
+        await documentService.getThisMonthDocumentsByOwner(
+          DocumentOwnerType.CLIENT,
+          id
+        );
+
+      // Filter out documents with status "EN_ESPERA" or "SIN_ENTREGA"
+      const filteredDocuments = clientDocuments.filter(
+        (doc) =>
+          doc.validStatus !== DocumentStatus.EN_ESPERA &&
+          doc.validStatus !== DocumentStatus.SIN_ENTREGA
+      );
+
+      if (filteredDocuments.length === 0) {
+        return false;
+      }
+
+      const hasRejectedDocument = filteredDocuments.some(
+        (doc) => doc.validStatus === DocumentStatus.RECHAZADO
+      );
+
+      if (hasRejectedDocument) {
+        await clientService.updateClientStatus(id, DocumentStatus.RECHAZADO);
+        return true;
+      }
+
+      const allDocumentsAccepted = filteredDocuments.every(
+        (doc) => doc.validStatus === DocumentStatus.ACEPTADO
+      );
+
+      if (allDocumentsAccepted) {
+        await clientService.updateClientStatus(id, DocumentStatus.ACEPTADO);
+        return true;
+      }
+
+      await clientService.updateClientStatus(id, DocumentStatus.POR_VALIDAR);
+      return true;
+    } catch (error) {
+      console.error("Error validating and updating client status:", error);
+      throw error;
+    }
   },
 };
 

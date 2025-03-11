@@ -36,7 +36,7 @@ const authController = {
       if (user) {
         const payload = { email: loginRequest.email, id: user.id };
         const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
-          expiresIn: "1h",
+          expiresIn: "1d",
         });
 
         loginResponse.success = true;
