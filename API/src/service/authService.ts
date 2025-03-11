@@ -11,7 +11,7 @@ const authService = {
   ): Promise<IUser | null> => {
     const connection = await pool.getConnection();
     const [rows] = await connection.query<RowDataPacket[]>(
-      "SELECT * FROM User WHERE email = ? AND password = ?",
+      "SELECT * FROM User WHERE email = ? AND password = SHA2(?,224)",
       [email, password]
     );
     connection.release();
