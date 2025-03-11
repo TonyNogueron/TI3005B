@@ -6,10 +6,9 @@ import {
   DocumentOwnerType,
   FileUpload,
 } from "../interfaces/IGoogleDriveInterfaces";
-import { DocumentType } from "../interfaces/IDocumentInterfaces";
+import path from "path";
 
-const KEYPATH: string =
-  "/Users/tonynogueron/Documents/Tec/Universidad/Materias/8vo Semestre/Bloque Hilados/TI3005B/API/src/google-drive/GDriveAPIKEY.json";
+const KEYPATH: string = path.join(__dirname, "./GDriveAPIKEY.json");
 const SCOPES: string[] = ["https://www.googleapis.com/auth/drive"];
 
 const auth = new google.auth.GoogleAuth({

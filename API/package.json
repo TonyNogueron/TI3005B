@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts",
-    "build": "tsc"
+    "build": "tsc && cp -r src/config/emailTemplates dist/config/ && cp src/google-drive/GDriveAPIKEY.json dist/google-drive/"
   },
   "keywords": [],
   "author": "",
