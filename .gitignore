@@ -1,4 +1,10 @@
 node_modules
 .env
+*.env
+.envDev
+
 dist
 docker-compose.yml
+
+*APIKEY.json
+*config.json

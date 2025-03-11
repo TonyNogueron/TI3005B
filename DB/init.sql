@@ -1,5 +1,7 @@
 -- Initialize the database
-CREATE DATABASE IF NOT EXISTS Hilados;
+CREATE DATABASE IF NOT EXISTS Hilados character
+set
+    utf8mb4 collate utf8mb4_bin;
 
 USE Hilados;
 
@@ -24,9 +26,10 @@ CREATE TABLE
         documentsStatus ENUM (
             'Sin entrega',
             'Por validar',
-            'Incorrecto',
-            'Aceptado'
-        ) NOT NULL DEFAULT 'Sin entrega',
+            'Rechazado',
+            'Aceptado',
+            'En espera'
+        ) NOT NULL DEFAULT 'En espera',
         isActive BOOLEAN DEFAULT TRUE,
         FOREIGN KEY (vendorId) REFERENCES Vendor (id)
     );
@@ -42,9 +45,10 @@ CREATE TABLE
         documentsStatus ENUM (
             'Sin entrega',
             'Por validar',
-            'Incorrecto',
-            'Aceptado'
-        ) NOT NULL DEFAULT 'Sin entrega',
+            'Rechazado',
+            'Aceptado',
+            'En espera'
+        ) NOT NULL DEFAULT 'En espera',
         isActive BOOLEAN DEFAULT TRUE,
         FOREIGN KEY (vendorId) REFERENCES Vendor (id)
     );
@@ -75,10 +79,13 @@ CREATE TABLE
         fileUrl TEXT NULL,
         uploadTimestamp TIMESTAMP NULL DEFAULT NULL,
         requestedTimestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        validStatus ENUM ('Por validar', 'Aceptado', 'Rechazado') NOT NULL DEFAULT 'Por validar',
-        rejectedReason TEXT NULL,
-        uploadedBy INT NULL,
-        FOREIGN KEY (uploadedBy) REFERENCES User (id)
+        validStatus ENUM (
+            'Por validar',
+            'Aceptado',
+            'Rechazado',
+            'En espera'
+        ) NOT NULL DEFAULT 'En espera',
+        rejectedReason TEXT NULL
     );
 
 -- Insert dummy data
@@ -105,14 +112,14 @@ VALUES
         1,
         'tec@hiladosdealtacalidad.com',
         '7774664704',
-        'Por validar'
+        'Sin entrega'
     ),
     (
         'Hilos Diseño',
         1,
         'administracion_hilos_diseno@gmail.com',
         '7771983876',
-        'Por validar'
+        'En espera'
     );
 
 INSERT INTO
@@ -138,7 +145,7 @@ VALUES
     (
         'Admin',
         'admin@hiladosdealtacalidad.com',
-        'Numero12345$.'
+        SHA2 ('Numero12345$.', 224)
     );
 
 INSERT INTO
@@ -150,7 +157,6 @@ INSERT INTO
         fileType,
         fileUrl,
         validStatus,
-        uploadedBy,
         uploadTimestamp
     )
 VALUES
@@ -159,10 +165,9 @@ VALUES
         1,
         'ConstanciaDeSituacionFiscal',
         'constancia.pdf',
-        'PDF',
+        'application/pdf',
         'https://www.orimi.com/pdf-test.pdf',
         'Aceptado',
-        1,
         CURRENT_TIMESTAMP
     ),
     (
@@ -170,10 +175,9 @@ VALUES
         1,
         'OpinionDeCumplimiento',
         'opinion.pdf',
-        'PDF',
+        'application/pdf',
         'https://www.orimi.com/pdf-test.pdf',
         'Aceptado',
-        1,
         CURRENT_TIMESTAMP
     ),
     (
@@ -181,9 +185,8 @@ VALUES
         1,
         'Contrato',
         'contrato.pdf',
-        'PDF',
+        'application/pdf',
         'https://www.orimi.com/pdf-test.pdf',
         'Aceptado',
-        1,
         CURRENT_TIMESTAMP
     );
