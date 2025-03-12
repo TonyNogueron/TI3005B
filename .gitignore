@@ -8,3 +8,6 @@ docker-compose.yml
 
 *APIKEY.json
 *config.json
+
+*Clients.sql
+*Providers.sql
